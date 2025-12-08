@@ -51,11 +51,26 @@
     client.mutation(api.counters.reset, { id });
   }
 
+  const debounceTimers = new Map<Id<'notes'>, ReturnType<typeof setTimeout>>();
+
   function updateNote(id: Id<'notes'>, content: string) {
-    client.mutation(api.notes.update, { id, content });
+    const existing = debounceTimers.get(id);
+    if (existing) clearTimeout(existing);
+
+    const timer = setTimeout(() => {
+      client.mutation(api.notes.update, { id, content });
+      debounceTimers.delete(id);
+    }, 300);
+
+    debounceTimers.set(id, timer);
   }
 
   function removeNote(id: Id<'notes'>) {
+    const timer = debounceTimers.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      debounceTimers.delete(id);
+    }
     client.mutation(api.notes.remove, { id });
   }
 </script>
