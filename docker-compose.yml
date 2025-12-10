@@ -1,6 +1,9 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - PUBLIC_CONVEX_URL=${PUBLIC_CONVEX_URL}
     ports:
       - '47823:3000'
     environment:
