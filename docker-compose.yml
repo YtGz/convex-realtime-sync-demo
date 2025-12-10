@@ -6,3 +6,4 @@ services:
     environment:
       - NODE_ENV=production
       - ORIGIN=http://localhost:47823
+      - PUBLIC_CONVEX_URL=${PUBLIC_CONVEX_URL}
