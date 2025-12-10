@@ -67,17 +67,17 @@
 </script>
 
 <div
-  class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+  class="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
 >
-  <div class="mx-auto max-w-6xl px-4 py-12">
+  <div class="mx-auto max-w-6xl px-4 py-6 sm:py-12">
     <!-- Header -->
-    <header class="mb-16 text-center">
+    <header class="mb-8 text-center sm:mb-16">
       <h1
-        class="mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-5xl font-bold text-transparent"
+        class="mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-3xl font-bold text-transparent sm:text-5xl"
       >
         Convex Realtime Demo
       </h1>
-      <p class="mx-auto max-w-2xl text-lg text-slate-400">
+      <p class="mx-auto max-w-2xl text-sm text-slate-400 sm:text-lg">
         Open this page in multiple browser windows or devices to see changes
         sync instantly. Try clicking the counters or drawing on the canvases!
       </p>
@@ -96,27 +96,27 @@
     </header>
 
     <!-- Counters Section -->
-    <section class="mb-16">
-      <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-2xl font-semibold text-white">Interactive Counters</h2>
+    <section class="mb-8 sm:mb-16">
+      <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-xl font-semibold text-white sm:text-2xl">Interactive Counters</h2>
         <form
           onsubmit={(e) => {
             e.preventDefault();
             createCounter();
           }}
-          class="flex gap-2"
+          class="flex w-full gap-2 sm:w-auto"
         >
           <input
             type="text"
             bind:value={newCounterName}
             placeholder="Counter name..."
-            class="rounded-lg border-0 bg-slate-700/50 px-4 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500"
+            class="min-w-0 flex-1 rounded-lg border-0 bg-slate-700/50 px-4 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 sm:flex-none"
           />
           <button
             type="submit"
-            class="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 font-medium text-white transition-transform hover:scale-105 active:scale-95"
+            class="shrink-0 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 font-medium text-white transition-transform hover:scale-105 active:scale-95"
           >
-            Add Counter
+            Add
           </button>
         </form>
       </div>
@@ -180,7 +180,7 @@
     <!-- Canvases Section -->
     <section>
       <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-2xl font-semibold text-white">
+        <h2 class="text-xl font-semibold text-white sm:text-2xl">
           Collaborative Canvases
         </h2>
         <button
@@ -225,7 +225,7 @@
     </section>
 
     <!-- Instructions -->
-    <footer class="mt-16 text-center">
+    <footer class="mt-8 text-center sm:mt-16">
       <div class="rounded-xl bg-slate-800/30 p-6">
         <h3 class="mb-3 font-medium text-white">How to test realtime sync</h3>
         <ol class="mx-auto max-w-md space-y-2 text-left text-sm text-slate-400">

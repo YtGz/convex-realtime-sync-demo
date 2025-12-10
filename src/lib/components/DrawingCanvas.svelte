@@ -169,7 +169,7 @@
     ontouchstart={startDrawing}
     ontouchmove={draw}
     ontouchend={stopDrawing}
-    class="h-48 w-full cursor-crosshair rounded-lg"
+    class="h-48 w-full cursor-crosshair rounded-lg touch-none"
   ></canvas>
 
   <div class="flex items-center justify-between border-t border-slate-700 pt-3">
