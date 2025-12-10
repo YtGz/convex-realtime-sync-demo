@@ -8,18 +8,18 @@
  * @module
  */
 
-import type * as counters from "../counters.js";
-import type * as notes from "../notes.js";
+import type * as canvases from '../canvases.js';
+import type * as counters from '../counters.js';
 
 import type {
   ApiFromModules,
   FilterApi,
-  FunctionReference,
-} from "convex/server";
+  FunctionReference
+} from 'convex/server';
 
 declare const fullApi: ApiFromModules<{
+  canvases: typeof canvases;
   counters: typeof counters;
-  notes: typeof notes;
 }>;
 
 /**
@@ -32,7 +32,7 @@ declare const fullApi: ApiFromModules<{
  */
 export declare const api: FilterApi<
   typeof fullApi,
-  FunctionReference<any, "public">
+  FunctionReference<any, 'public'>
 >;
 
 /**
@@ -45,7 +45,7 @@ export declare const api: FilterApi<
  */
 export declare const internal: FilterApi<
   typeof fullApi,
-  FunctionReference<any, "internal">
+  FunctionReference<any, 'internal'>
 >;
 
 export declare const components: {};
