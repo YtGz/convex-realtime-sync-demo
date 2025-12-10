@@ -2,13 +2,13 @@
   import { useQuery, useConvexClient } from 'convex-svelte';
   import { api } from '$convex/_generated/api';
   import type { Id } from '$convex/_generated/dataModel';
+  import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
 
   const client = useConvexClient();
   const counters = useQuery(api.counters.list, () => ({}));
-  const notes = useQuery(api.notes.list, () => ({}));
+  const canvases = useQuery(api.canvases.list, () => ({}));
 
   let newCounterName = $state('');
-  let newNoteContent = $state('');
 
   const colors = [
     'from-pink-500 to-rose-500',
@@ -31,12 +31,8 @@
     newCounterName = '';
   }
 
-  async function createNote() {
-    if (!newNoteContent.trim()) return;
-    await client.mutation(api.notes.create, {
-      content: newNoteContent.trim()
-    });
-    newNoteContent = '';
+  async function createCanvas() {
+    await client.mutation(api.canvases.create, {});
   }
 
   function increment(id: Id<'counters'>) {
@@ -51,27 +47,22 @@
     client.mutation(api.counters.reset, { id });
   }
 
-  const debounceTimers = new Map<Id<'notes'>, ReturnType<typeof setTimeout>>();
+  type Stroke = {
+    points: { x: number; y: number }[];
+    color: string;
+    width: number;
+  };
 
-  function updateNote(id: Id<'notes'>, content: string) {
-    const existing = debounceTimers.get(id);
-    if (existing) clearTimeout(existing);
-
-    const timer = setTimeout(() => {
-      client.mutation(api.notes.update, { id, content });
-      debounceTimers.delete(id);
-    }, 300);
-
-    debounceTimers.set(id, timer);
+  function addStroke(id: Id<'canvases'>, stroke: Stroke) {
+    client.mutation(api.canvases.addStroke, { id, stroke });
   }
 
-  function removeNote(id: Id<'notes'>) {
-    const timer = debounceTimers.get(id);
-    if (timer) {
-      clearTimeout(timer);
-      debounceTimers.delete(id);
-    }
-    client.mutation(api.notes.remove, { id });
+  function clearCanvas(id: Id<'canvases'>) {
+    client.mutation(api.canvases.clear, { id });
+  }
+
+  function removeCanvas(id: Id<'canvases'>) {
+    client.mutation(api.canvases.remove, { id });
   }
 </script>
 
@@ -88,7 +79,7 @@
       </h1>
       <p class="mx-auto max-w-2xl text-lg text-slate-400">
         Open this page in multiple browser windows or devices to see changes
-        sync instantly. Try clicking the counters or editing text below!
+        sync instantly. Try clicking the counters or drawing on the canvases!
       </p>
       <div class="mt-4 flex items-center justify-center gap-2">
         <span class="relative flex h-3 w-3">
@@ -186,64 +177,39 @@
       {/if}
     </section>
 
-    <!-- Notes Section -->
+    <!-- Canvases Section -->
     <section>
       <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-2xl font-semibold text-white">Collaborative Notes</h2>
-        <form
-          onsubmit={(e) => {
-            e.preventDefault();
-            createNote();
-          }}
-          class="flex gap-2"
+        <h2 class="text-2xl font-semibold text-white">
+          Collaborative Canvases
+        </h2>
+        <button
+          onclick={createCanvas}
+          class="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 font-medium text-white transition-transform hover:scale-105 active:scale-95"
         >
-          <input
-            type="text"
-            bind:value={newNoteContent}
-            placeholder="Start a new note..."
-            class="rounded-lg border-0 bg-slate-700/50 px-4 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            class="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 font-medium text-white transition-transform hover:scale-105 active:scale-95"
-          >
-            Add Note
-          </button>
-        </form>
+          Add Canvas
+        </button>
       </div>
 
-      {#if notes.isLoading}
+      {#if canvases.isLoading}
         <div class="flex items-center justify-center py-12">
           <div
             class="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"
           ></div>
         </div>
-      {:else if notes.data && notes.data.length > 0}
+      {:else if canvases.data && canvases.data.length > 0}
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {#each notes.data as note (note._id)}
+          {#each canvases.data as canvas (canvas._id)}
             <div
               class="group relative rounded-xl bg-slate-800/50 p-4 ring-1 ring-slate-700 transition-all hover:ring-blue-500/50"
             >
-              <textarea
-                value={note.content}
-                oninput={(e) =>
-                  updateNote(note._id, (e.target as HTMLTextAreaElement).value)}
-                class="min-h-[100px] w-full resize-none border-0 bg-transparent text-white placeholder-slate-500 focus:ring-0"
-                placeholder="Type something..."
-              ></textarea>
-              <div
-                class="flex items-center justify-between border-t border-slate-700 pt-3"
-              >
-                <span class="text-xs text-slate-500">
-                  Updated {new Date(note.updatedAt).toLocaleTimeString()}
-                </span>
-                <button
-                  onclick={() => removeNote(note._id)}
-                  class="text-slate-500 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
-                >
-                  Delete
-                </button>
-              </div>
+              <DrawingCanvas
+                strokes={canvas.strokes}
+                updatedAt={canvas.updatedAt}
+                onStrokeComplete={(stroke) => addStroke(canvas._id, stroke)}
+                onClear={() => clearCanvas(canvas._id)}
+                onDelete={() => removeCanvas(canvas._id)}
+              />
             </div>
           {/each}
         </div>
@@ -251,7 +217,9 @@
         <div
           class="rounded-2xl border-2 border-dashed border-slate-700 py-12 text-center"
         >
-          <p class="text-slate-400">No notes yet. Create one to get started!</p>
+          <p class="text-slate-400">
+            No canvases yet. Create one to get started!
+          </p>
         </div>
       {/if}
     </section>
@@ -265,7 +233,7 @@
           <li>2. Position both windows side by side</li>
           <li>3. Click a counter button in one window</li>
           <li>4. Watch the value update instantly in both windows!</li>
-          <li>5. Try typing in a note field to see live text sync</li>
+          <li>5. Try drawing on a canvas to see live scribble sync</li>
         </ol>
       </div>
     </footer>
